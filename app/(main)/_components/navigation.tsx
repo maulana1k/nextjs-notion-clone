@@ -8,6 +8,7 @@ import {
   PlusCircle,
   Search,
   Settings,
+  Trash,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { ElementRef, useEffect, useRef, useState } from "react";
@@ -18,11 +19,18 @@ import { api } from "@/convex/_generated/api";
 import { Item } from "./item";
 import { toast } from "sonner";
 import { DocumentList } from "./document-list";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { TrashBox } from "./trash-box";
+import { useSearch } from "@/hooks/use-search";
 
 export const Navigation = () => {
+  const search = useSearch();
   const pathname = usePathname();
   const isMobile = useMediaQuery("(max-width: 780px");
-  const documents = useQuery(api.documents.get);
   const create = useMutation(api.documents.create);
 
   const isResizingRef = useRef(false);
@@ -112,7 +120,7 @@ export const Navigation = () => {
       <aside
         ref={sidebarRef}
         className={cn(
-          "group/sidebar h-full w-60 bg-secondary overflow-y-auto relative flex  flex-col z-[999]",
+          "group/sidebar h-full w-60 bg-secondary overflow-y-auto relative flex  flex-col z-[100]",
           isResetting && "transition-all ease duration-300",
           isMobile && "w-0"
         )}
@@ -128,12 +136,23 @@ export const Navigation = () => {
           <ChevronsLeft className="h-6 w-6" />
         </div>
         <UserItem />
-        <Item label="Search" icon={Search} isSearch onClick={() => {}} />
+        <Item label="Search" icon={Search} isSearch onClick={search.onOpen} />
         <Item label="Settings" icon={Settings} onClick={() => {}} />
-        <Item onClick={handleCreate} label="Add a page" icon={Plus} />
-        <div>
+        <Item onClick={handleCreate} label="Add a page" icon={PlusCircle} />
+
+        <div className="mt-4">
           <DocumentList />
+          <Item onClick={handleCreate} icon={Plus} label="Add a page" />
+          <Popover>
+            <PopoverTrigger className="w-full mt-4">
+              <Item icon={Trash} label="Trash" />
+            </PopoverTrigger>
+            <PopoverContent side={isMobile ? "bottom" : "right"}>
+              <TrashBox />
+            </PopoverContent>
+          </Popover>
         </div>
+
         <div
           onClick={resetWidth}
           onMouseDown={(e) => handleMouseDown(e)}

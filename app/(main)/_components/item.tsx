@@ -1,17 +1,29 @@
 "use client";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
+import { useUser } from "@clerk/clerk-react";
 import { useMutation } from "convex/react";
 import {
+  Archive,
+  ArchiveIcon,
   ChevronDown,
   ChevronRight,
   ChevronUp,
   Icon,
   LucideIcon,
+  MoreHorizontal,
   Plus,
+  Trash,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -21,7 +33,7 @@ interface ItemProps {
   id?: Id<"documents">;
   documentIcon?: string;
   label: string;
-  onClick: () => void;
+  onClick?: () => void;
   icon: LucideIcon;
   active?: boolean;
   expanded?: boolean;
@@ -43,13 +55,29 @@ export const Item = ({
   onExpand,
 }: ItemProps) => {
   const create = useMutation(api.documents.create);
+  const archive = useMutation(api.documents.archive);
   const router = useRouter();
+  const { user } = useUser();
   const ChevronIcon = expanded ? ChevronDown : ChevronRight;
 
   const handleExpand = (e: React.MouseEvent) => {
     e.stopPropagation();
     onExpand?.();
   };
+
+  const onArchive = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!id) return;
+
+    const promise = archive({ id });
+
+    toast.promise(promise, {
+      loading: "Deleting new note...",
+      success: "Note deleted",
+      error: "Failed to delete note",
+    });
+  };
+
   const onCreate = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!id) return;
@@ -71,9 +99,9 @@ export const Item = ({
       <div
         onClick={onClick}
         role="button"
-        style={{ paddingLeft: level ? `${level * 12 + 12}px` : "12px" }}
+        style={{ paddingLeft: level ? `${level * 12 + 12}px` : "6px" }}
         className={cn(
-          "group flex min-h-[27px] text-sm pr-3 w-full rounded-md hover:bg-primary/5  items-center text-muted-foreground font-medium",
+          "group flex min-h-[27px] text-sm pr-3 py-2 w-full rounded-md hover:bg-primary/5  items-center  text-muted-foreground font-medium",
           active && "bg-primary/5 text-primary"
           // expanded && "flex"
         )}
@@ -81,7 +109,7 @@ export const Item = ({
         {!!id && (
           <div
             role="button"
-            className="h-full rounded-sm hover:bg-zinc-300 dark:bg-zinc-600 mr-1 p-[2px]"
+            className="h-full rounded-sm hover:bg-zinc-300 dark:hover:bg-zinc-600 mr-1 p-[2px]"
             onClick={handleExpand}
           >
             <ChevronIcon className="w-4 h-4" />
@@ -99,13 +127,39 @@ export const Item = ({
           </kbd>
         )}
         {!!id && (
-          <div
-            role="button"
-            onClick={onCreate}
-            className="ml-auto flex items-center gap-x-2"
-          >
-            <div className="opacity-0 group-hover:opacity-100 h-full ml-auto rounded-sm hover:bg-zinc-300 dark:hover:bg-zinc-600 p-[2px]">
-              <Plus className="h-4 w-4 text-muted-foreground" />
+          <div className="ml-auto flex items-center gap-x-2 ">
+            <DropdownMenu>
+              <DropdownMenuTrigger onClick={(e) => e.stopPropagation()} asChild>
+                <div
+                  role="button"
+                  className="opacity-0 group-hover:opacity-100 h-full ml-auto rounded-sm hover:bg-zinc-300 dark:hover:bg-zinc-600 p-[2px]"
+                >
+                  <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-60 "
+                align="start"
+                side="right"
+                forceMount
+              >
+                <DropdownMenuItem onClick={onArchive}>
+                  <ArchiveIcon className="h-4 w-4 mr-2" /> Archive
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <div className="text-xs text-muted-foreground p-2">
+                  Last edited by: {user?.fullName}
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <div
+              role="button"
+              onClick={onCreate}
+              className="ml-auto flex items-center gap-x-2"
+            >
+              <div className="opacity-0 group-hover:opacity-100 h-full ml-auto rounded-sm hover:bg-zinc-300 dark:hover:bg-zinc-600 p-[2px]">
+                <Plus className="h-4 w-4 text-muted-foreground" />
+              </div>
             </div>
           </div>
         )}

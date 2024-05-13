@@ -53,6 +53,17 @@ export const DocumentList = ({
   }
   return (
     <>
+      {documents == undefined && (
+        <>
+          <Item.Skeleton level={level} />
+          {level === 0 && (
+            <>
+              <Item.Skeleton level={level} />
+              <Item.Skeleton level={level} />
+            </>
+          )}
+        </>
+      )}
       {documents.map((doc) => (
         <div>
           <Item
