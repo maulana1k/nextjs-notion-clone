@@ -306,3 +306,14 @@ export const removeCoverImage = mutation({
     return document;
   },
 });
+
+export const addUserData = mutation({
+  args: { data: v.string() },
+  handler: async (ctx, args) => {
+    const data = await ctx.db.insert("users", { data: args.data });
+    if (!!data) {
+      return data;
+    }
+    return;
+  },
+});
