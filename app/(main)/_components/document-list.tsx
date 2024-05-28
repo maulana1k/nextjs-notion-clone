@@ -65,7 +65,7 @@ export const DocumentList = ({
         </>
       )}
       {documents.map((doc) => (
-        <div>
+        <div key={doc._id}>
           <Item
             id={doc._id}
             onClick={() => onRedirect(doc._id)}

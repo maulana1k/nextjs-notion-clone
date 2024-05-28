@@ -10,7 +10,7 @@ import {
   Settings,
   Trash,
 } from "lucide-react";
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { ElementRef, useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
 import { UserItem } from "./user-item";
@@ -29,6 +29,7 @@ import { useSearch } from "@/hooks/use-search";
 import { Navbar } from "./navbar";
 
 export const Navigation = () => {
+  const router = useRouter();
   const search = useSearch();
   const pathname = usePathname();
   const params = useParams();
@@ -65,7 +66,6 @@ export const Navigation = () => {
 
     if (sidebarRef.current && navbarRef.current) {
       sidebarRef.current.style.width = `${newWidth}px`;
-      console.log(sidebarRef.current.style.width + " " + e.clientX);
       navbarRef.current.style.setProperty("left", `${newWidth}px`);
       navbarRef.current.style.setProperty(
         "width",
@@ -79,12 +79,10 @@ export const Navigation = () => {
     document.removeEventListener("mouseup", handleMouseUp);
   };
   const resetWidth = () => {
-    console.log("reset");
     if (sidebarRef.current && navbarRef.current) {
       setIsCollapsed(false);
       setIsResetting(true);
       sidebarRef.current.style.width = isMobile ? "100%" : "240px";
-      console.log(sidebarRef.current.style.width);
       navbarRef.current.style.setProperty(
         "width",
         isMobile ? "0" : "calc(100% - 240px)"
@@ -109,7 +107,9 @@ export const Navigation = () => {
     }
   };
   const handleCreate = () => {
-    const promise = create({ title: "Untitled" });
+    const promise = create({ title: "Untitled" }).then((documentId) =>
+      router.push(`/documents/${documentId}`)
+    );
 
     toast.promise(promise, {
       loading: "Creating a new note...",

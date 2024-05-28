@@ -192,7 +192,19 @@ export const getSearch = query({
     return documents;
   },
 });
+export const getPreview = query({
+  args: { documentId: v.id("documents") },
+  handler: async (ctx, args) => {
+    const document = await ctx.db.get(args.documentId);
+    if (!document) {
+      throw new Error("Not found");
+    }
 
+    if (document?.isPublished && !document?.isArchived) {
+      return document;
+    }
+  },
+});
 export const getById = query({
   args: { documentId: v.id("documents") },
   handler: async (ctx, args) => {
@@ -266,6 +278,30 @@ export const removeIcon = mutation({
     }
 
     const document = await ctx.db.patch(args.id, { icon: undefined });
+
+    return document;
+  },
+});
+
+export const removeCoverImage = mutation({
+  args: { id: v.id("documents") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    const userId = identity.subject;
+
+    const exist = await ctx.db.get(args.id);
+    if (!exist) {
+      throw new Error("Not found");
+    }
+    if (exist.userId !== userId) {
+      throw new Error("Unauthorized");
+    }
+
+    const document = await ctx.db.patch(args.id, { coverImage: undefined });
 
     return document;
   },

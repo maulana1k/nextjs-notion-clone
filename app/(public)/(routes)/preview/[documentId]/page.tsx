@@ -17,7 +17,7 @@ interface DocumentIdPageProps {
 }
 
 const DocumentIdPage = ({ params }: DocumentIdPageProps) => {
-  const document = useQuery(api.documents.getById, {
+  const document = useQuery(api.documents.getPreview, {
     documentId: params.documentId,
   });
   if (document === undefined) {
@@ -36,7 +36,7 @@ const DocumentIdPage = ({ params }: DocumentIdPageProps) => {
     );
   }
   if (document === null) {
-    return <div>Not found</div>;
+    throw new Error();
   }
 
   return (
@@ -47,10 +47,14 @@ const DocumentIdPage = ({ params }: DocumentIdPageProps) => {
         !document.coverImage && "h-[800px]"
       )}
     >
-      <Cover url={document.coverImage} />
+      <Cover preview url={document.coverImage} />
       <div className="md:max-w-3xl lg:max-w-4xl mx-auto">
-        <Toolbar initialData={document} />
-        <Editor initialContent={document.content} documentId={document._id} />
+        <Toolbar preview initialData={document} />
+        <Editor
+          editable={false}
+          initialContent={document.content}
+          documentId={document._id}
+        />
       </div>
     </div>
   );

@@ -35,8 +35,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <ConvexClientProvider>
-          <EdgeStoreProvider>
+        <EdgeStoreProvider>
+          <ConvexClientProvider>
             <ThemeProvider
               attribute="class"
               defaultTheme="system"
@@ -48,8 +48,8 @@ export default function RootLayout({
               <ModalProvider />
               {children}
             </ThemeProvider>
-          </EdgeStoreProvider>
-        </ConvexClientProvider>
+          </ConvexClientProvider>
+        </EdgeStoreProvider>
       </body>
     </html>
   );
