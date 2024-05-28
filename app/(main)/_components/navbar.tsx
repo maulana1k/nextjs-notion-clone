@@ -43,13 +43,15 @@ export const Navbar = ({ isCollapsed, onResetWidth }: NavbarProps) => {
             className="h-6 w-6 text-muted-foreground"
           />
         )}
-        <div className="flex items-center justify-between w-full">
-          <Title initialData={document} />
-          <div className="flex items-center gap-x-2">
-            <Publish initialData={document} />
-            <Menu documentId={document._id} />
+        {!isCollapsed && (
+          <div className="flex items-center justify-between w-full">
+            <Title initialData={document} />
+            <div className="flex items-center gap-x-2">
+              <Publish initialData={document} />
+              <Menu documentId={document._id} />
+            </div>
           </div>
-        </div>
+        )}
       </div>
       {document?.isArchived && <Banner documentId={document._id} />}
       {/* <Toolbar initialData={document} preview={true} /> */}
