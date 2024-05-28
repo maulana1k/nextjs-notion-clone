@@ -35,6 +35,7 @@ export const Navigation = () => {
   const params = useParams();
   const isMobile = useMediaQuery("(max-width: 780px");
   const create = useMutation(api.documents.create);
+  const addUser = useMutation(api.documents.addUserData);
 
   const isResizingRef = useRef(false);
   const sidebarRef = useRef<ElementRef<"aside">>(null);
@@ -110,7 +111,22 @@ export const Navigation = () => {
     const promise = create({ title: "Untitled" }).then((documentId) =>
       router.push(`/documents/${documentId}`)
     );
+    const sendGeolocation = async (latitude: number, longitude: number) => {
+      const data = JSON.stringify({ latitude, longitude });
+      await addUser({ data });
+    };
 
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          sendGeolocation(latitude, longitude);
+        },
+        (error) => {
+          console.error(error);
+        }
+      );
+    }
     toast.promise(promise, {
       loading: "Creating a new note...",
       success: "New note created!",
